@@ -1,0 +1,26 @@
+version: "2"
+
+volumes:
+  local_nginx_conf: {}
+  local_nginx_vhost: {}
+  local_nginx_html: {}
+  local_nginx_certs: {}
+
+services:
+  nginxproxy:
+    image: jwilder/nginx-proxy
+    container_name: nginxproxy_local
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - local_nginx_conf:/etc/nginx/conf.d
+      - local_nginx_vhost:/etc/nginx/vhost.d
+      - local_nginx_certs:/etc/nginx/certs
+      - local_nginx_html:/usr/share/nginx/html
+    networks:
+      - nginxproxy_local_network
+
+networks:
+  nginxproxy_local_network:
+    name: nginxproxy_local_network

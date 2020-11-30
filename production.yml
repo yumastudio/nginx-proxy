@@ -1,0 +1,37 @@
+version: "2"
+
+volumes:
+  production_nginx_conf: {}
+  production_nginx_vhost: {}
+  production_nginx_html: {}
+  production_nginx_certs: {}
+
+services:
+  nginxproxy:
+    image: jwilder/nginx-proxy
+    container_name: nginxproxy_production
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - production_nginx_conf:/etc/nginx/conf.d
+      - production_nginx_vhost:/etc/nginx/vhost.d
+      - production_nginx_certs:/etc/nginx/certs
+      - production_nginx_html:/usr/share/nginx/html
+    networks:
+      - nginxproxy_production_network
+
+  sslgenerator:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: sslgenerator_production
+    volumes_from:
+      - nginxproxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - nginxproxy_production_network
+
+networks:
+  nginxproxy_production_network:
+    name: nginxproxy_production_network
